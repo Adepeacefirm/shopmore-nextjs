@@ -1,5 +1,5 @@
 {
-  "name": "gocart",
+  "name": "shopmore",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -7,7 +7,7 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
-    "postinstall": "prisma generate"
+    "postinstall": "npx prisma generate"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.36.9",
@@ -19,6 +19,7 @@
     "inngest": "^3.49.3",
     "lucide-react": "^0.525.0",
     "next": "15.3.5",
+    "prisma": "^7.3.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-hot-toast": "^2.5.2",
