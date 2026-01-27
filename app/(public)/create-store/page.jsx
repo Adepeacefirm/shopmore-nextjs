@@ -58,10 +58,12 @@ export default function CreateStore() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
+      console.log(data);
+
       toast.success(data.message);
     } catch (error) {
       console.log(error);
-      toast.error(error?.response?.data?.error || error.message);
+      toast.error(error?.response?.data?.message || error.message);
     }
   };
 
@@ -72,7 +74,9 @@ export default function CreateStore() {
   if (!user) {
     return (
       <div className="min-h-[80vh] mx-6 flex items-center justify-center text-slate-400">
-        <h1 className="text-2xl sm:text-4xl font-semibold">Please <span className="text-slate-500">Login</span> to continue</h1>
+        <h1 className="text-2xl sm:text-4xl font-semibold">
+          Please <span className="text-slate-500">Login</span> to continue
+        </h1>
       </div>
     );
   }

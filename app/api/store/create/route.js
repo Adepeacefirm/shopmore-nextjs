@@ -64,7 +64,7 @@ const POST = async (req) => {
     const base64File = buffer.toString("base64");
 
     const client = new ImageKit({
-      privateKey: process.env.IMAGEKIT_PRIVATE_KEY
+      privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
     });
 
     const response = await client.files.upload({
@@ -84,7 +84,6 @@ const POST = async (req) => {
       ],
     });
 
-
     const newStore = await prisma.store.create({
       data: {
         userId,
@@ -96,13 +95,6 @@ const POST = async (req) => {
         address,
         logo: optimizedImage,
       },
-    });
-
-    //Link store to user:
-
-    await prisma.user.update({
-      where: { id: userId },
-      data: { store: { connect: { id: newStore.id } } },
     });
 
     return NextResponse.json({
@@ -126,33 +118,38 @@ const POST = async (req) => {
 const GET = async (req) => {
   try {
     const { userId } = getAuth(req);
-    const storeExists = await prisma.store.findFirst({
+
+    if (!userId) {
+      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+    }
+
+    // Fetch all stores associated with this userId
+    const userStores = await prisma.store.findMany({
       where: { userId },
+      orderBy: { createdAt: 'desc' }
     });
 
-    if (storeExists) {
+    if (userStores.length > 0) {
       return NextResponse.json({
-        success: false,
-        message: "store already exists",
-        status: storeExists.status,
+        success: true,
+        message: "Stores found",
+        data: userStores,
       });
     }
 
     return NextResponse.json({
       success: true,
-      message: "User is not registered",
-      stauts: "not registered",
+      message: "User has no stores",
+      status: "not registered",
+      data: []
     });
+
   } catch (error) {
-    console.log(error);
+    console.error(error);
     return NextResponse.json(
-      {
-        success: false,
-        message: error.message,
-      },
-      { status: 500 },
+      { success: false, message: error.message },
+      { status: 500 }
     );
   }
 };
-
 export { POST, GET };
