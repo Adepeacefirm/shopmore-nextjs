@@ -45,7 +45,7 @@ const POST = async (req) => {
     // }
 
     const storeExists = await prisma.store.findFirst({
-      where: { username: username.toLowerCase() },
+      where: { userId },
     });
 
     if (storeExists) {
@@ -53,7 +53,23 @@ const POST = async (req) => {
         {
           success: false,
           message: "Store already exists",
+          status: storeExists.status,
         },
+        { status: 400 },
+      );
+    }
+
+    const usernameExists = await prisma.store.findFirst({
+      where: { username: username.toLowerCase() },
+    });
+
+    if (usernameExists) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Username already exists",
+        },
+
         { status: 400 },
       );
     }
@@ -120,35 +136,34 @@ const GET = async (req) => {
     const { userId } = getAuth(req);
 
     if (!userId) {
-      return NextResponse.json({ success: false, message: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { success: false, message: "Unauthorized" },
+        { status: 401 },
+      );
     }
 
-    // Fetch all stores associated with this userId
-    const userStores = await prisma.store.findMany({
+    const storeExists = await prisma.store.findFirst({
       where: { userId },
-      orderBy: { createdAt: 'desc' }
     });
 
-    if (userStores.length > 0) {
+    if (storeExists) {
       return NextResponse.json({
-        success: true,
-        message: "Stores found",
-        data: userStores,
+        success: false,
+        message: "store already exists",
+        status: store.status,
       });
     }
 
     return NextResponse.json({
-      success: true,
+      success: false,
       message: "User has no stores",
       status: "not registered",
-      data: []
     });
-
   } catch (error) {
     console.error(error);
     return NextResponse.json(
       { success: false, message: error.message },
-      { status: 500 }
+      { status: 500 },
     );
   }
 };

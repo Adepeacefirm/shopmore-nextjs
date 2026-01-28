@@ -33,9 +33,47 @@ export default function CreateStore() {
   };
 
   const fetchSellerStatus = async () => {
-    // Logic to check if the store is already submitted
+    const token = await getToken();
+    try {
+      const { data } = await axios.get("/api/store/create", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
-    setLoading(false);
+      console.log(data);
+
+      if (["approved", "rejected", "pending"].includes(data.status)) {
+        setStatus(data.status);
+        setAlreadySubmitted(true);
+        switch (data.status) {
+          case "approved":
+            setMessage(
+              "Your store has been approved. You can now add products to your store fro your dashboard",
+            );
+            setTimeout(() => router.push("/store"), 5000);
+            break;
+          case "rejected":
+            setMessage(
+              "Your store has been rejected. Contact support for more details",
+            );
+            break;
+          case "pending":
+            setMessage(
+              "Your store request is pending. Please wait for Support to approve your store",
+            );
+            break;
+
+          default:
+            break;
+        }
+      } else {
+        setAlreadySubmitted(false);
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error(error?.response?.data?.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const onSubmitHandler = async (e) => {
@@ -57,10 +95,8 @@ export default function CreateStore() {
       const { data } = await axios.post("/api/store/create", formData, {
         headers: { Authorization: `Bearer ${token}` },
       });
-
-      console.log(data);
-
       toast.success(data.message);
+      await fetchSellerStatus();
     } catch (error) {
       console.log(error);
       toast.error(error?.response?.data?.message || error.message);
@@ -68,8 +104,10 @@ export default function CreateStore() {
   };
 
   useEffect(() => {
-    fetchSellerStatus();
-  }, []);
+    if (user) {
+      fetchSellerStatus();
+    }
+  }, [user]);
 
   if (!user) {
     return (
