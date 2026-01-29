@@ -1,3 +1,4 @@
+import { inngest } from "@/inngest/client";
 import prisma from "@/lib/prisma";
 import authAdmin from "@/middlewares/authAdmin";
 import { getAuth } from "@clerk/nextjs/server";
@@ -17,7 +18,17 @@ const POST = async (req) => {
     const { coupon } = await req.json();
     coupon.code = coupon.code.toUpperCase();
 
-    await prisma.coupon.create({ data: coupon });
+    const createdCoupon = await prisma.coupon.create({
+      data: coupon,
+    });
+
+    await inngest.send({
+      name: "app/coupon.expired",
+      data: {
+        code: createdCoupon.code,
+        expires_at: createdCoupon.expiresAt,
+      },
+    });
 
     return NextResponse.json({
       success: true,
