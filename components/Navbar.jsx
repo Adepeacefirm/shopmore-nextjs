@@ -8,6 +8,8 @@ import { useSelector } from "react-redux";
 
 const Navbar = () => {
   const { user } = useUser();
+  console.log(user);
+  
   const { openSignIn } = useClerk();
   const router = useRouter();
 

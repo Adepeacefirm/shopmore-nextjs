@@ -150,7 +150,7 @@ const GET = async (req) => {
       return NextResponse.json({
         success: false,
         message: "store already exists",
-        status: store.status,
+        status: storeExists.status,
       });
     }
 
