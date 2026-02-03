@@ -54,7 +54,7 @@ const DELETE = async (req) => {
       );
     }
 
-    const { searchParams } = req.nexturl;
+    const { searchParams } = req.nextUrl;
     const code = searchParams.get("code");
 
     await prisma.coupon.delete({ where: { code } });

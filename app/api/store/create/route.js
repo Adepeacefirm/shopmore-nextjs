@@ -1,9 +1,8 @@
 import imagekit from "@/configs/imageKit";
 import prisma from "@/lib/prisma";
 import { getAuth } from "@clerk/nextjs/server";
-import ImageKit from "@imagekit/nodejs";
+// import ImageKit from "@imagekit/nodejs";
 import { NextResponse } from "next/server";
-import fs from "fs-extra";
 
 const POST = async (req) => {
   try {
@@ -31,18 +30,6 @@ const POST = async (req) => {
         { status: 400 },
       );
     }
-
-    // const storeExists = await prisma.store.findFirst({
-    //   where: { username },
-    // });
-
-    // if (storeExists) {
-    //   return NextResponse.json({
-    //     success: false,
-    //     message: "store already exists",
-    //     status: storeExists.status,
-    //   });
-    // }
 
     const storeExists = await prisma.store.findFirst({
       where: { userId },
@@ -77,30 +64,18 @@ const POST = async (req) => {
     //Image upload to imageKit
 
     const buffer = Buffer.from(await image.arrayBuffer());
-    const base64File = buffer.toString("base64");
 
-    const client = new ImageKit({
-      privateKey: process.env.IMAGEKIT_PRIVATE_KEY,
-    });
-
-    const response = await client.files.upload({
-      file: base64File,
+    const response = await imagekit.files.upload({
+      file: buffer.toString("base64"),
       fileName: `${username}-logo`,
       folder: "logos",
     });
 
-    console.log(response);
+    const optimizedImage = `${process.env.IMAGEKIT_URL_ENDPOINT}${response.filePath}?tr=q-auto,f-webp,w-512`;
 
-    const optimizedImage = client.helper.buildSrc({
-      path: response.filePath,
-      transformation: [
-        { quality: "auto" },
-        { format: "webp" },
-        { width: "512" },
-      ],
-    });
+    console.log("optimizedImage", optimizedImage);
 
-    const newStore = await prisma.store.create({
+    await prisma.store.create({
       data: {
         userId,
         name,

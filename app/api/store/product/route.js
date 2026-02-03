@@ -23,14 +23,14 @@ const POST = async (req) => {
     const description = formData.get("description");
     const mrp = Number(formData.get("mrp"));
     const price = Number(formData.get("price"));
-    const catgeory = formData.get("category");
+    const category = formData.get("category");
     const images = formData.getAll("images");
 
-    if (!name || !description || !mrp || !price || !catgeory || !image) {
+    if (!name || !description || !mrp || !price || !category || !images) {
       return NextResponse.json(
         {
           success: false,
-          error: "missing product details",
+          message: "missing product details",
         },
         { status: 500 },
       );
@@ -41,19 +41,12 @@ const POST = async (req) => {
     const imagesUrl = await Promise.all(
       images.map(async (image) => {
         const buffer = Buffer.from(await image.arrayBuffer());
-        const response = await imagekit.upload({
-          file: buffer,
+        const response = await imagekit.files.upload({
+          file: buffer.toString("base64"),
           fileName: image.name,
           folder: "products",
         });
-        const url = imagekit.url({
-          path: response.filePath,
-          transformation: [
-            { quality: "auto" },
-            { format: "webp" },
-            { width: "1024" },
-          ],
-        });
+        const url = `${process.env.IMAGEKIT_URL_ENDPOINT}${response.filePath}?tr=q-auto,f-webp,w-1024`;
         return url;
       }),
     );
@@ -100,10 +93,10 @@ const GET = async (req) => {
     }
 
     const products = await prisma.product.findMany({
-        where: {storeId}
-    })
+      where: { storeId },
+    });
 
-    return NextResponse.json({ success: true, products})
+    return NextResponse.json({ success: true, products });
   } catch (error) {
     return NextResponse.json(
       {

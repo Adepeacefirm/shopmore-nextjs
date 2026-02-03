@@ -70,7 +70,7 @@ export default function AdminCoupons() {
       if (!confirm) return;
 
       const token = await getToken();
-      await axios.delete(`api/admin/coupon?code=${code}`, {
+      await axios.delete(`/api/admin/coupon?code=${code}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 

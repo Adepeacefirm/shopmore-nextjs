@@ -1,6 +1,11 @@
 "use client";
-import { useClerk, UserButton, useUser } from "@clerk/nextjs";
-import { PackageIcon, Search, ShoppingCart, ShoppingCartIcon } from "lucide-react";
+import { Protect, useClerk, UserButton, useUser } from "@clerk/nextjs";
+import {
+  PackageIcon,
+  Search,
+  ShoppingCart,
+  ShoppingCartIcon,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -8,8 +13,7 @@ import { useSelector } from "react-redux";
 
 const Navbar = () => {
   const { user } = useUser();
-  console.log(user);
-  
+
   const { openSignIn } = useClerk();
   const router = useRouter();
 
@@ -31,9 +35,11 @@ const Navbar = () => {
           >
             <span className="text-green-600">Shop</span>More
             <span className="text-green-600 text-5xl leading-0">.</span>
-            <p className="absolute text-xs font-semibold -top-1 -right-8 px-3 p-0.5 rounded-full flex items-center gap-2 text-white bg-green-500">
-              plus
-            </p>
+            <Protect plan={"plus"}>
+              <p className="absolute text-xs font-semibold -top-1 -right-8 px-3 p-0.5 rounded-full flex items-center gap-2 text-white bg-green-500">
+                plus
+              </p>
+            </Protect>
           </Link>
 
           {/* Desktop Menu */}
